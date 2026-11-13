@@ -83,8 +83,8 @@ button {
   html[data-page="profile"] .sb-tint {
     background-color: #1C81FE;
     background-image: linear-gradient(90deg,
-      #0052FE 0%, #0052FE 7%, #0153FF 17%, #0057FF 27%, #005BFE 37%,
-      #0166FF 48%, #0177FF 58%, #0086FF 68%, #008FFE 78%, #0896FE 88%, #2E9CFE 100%);
+      #0051FE 0%, #0052FE 8%, #0053FE 18%, #0058FE 28%, #0067FE 38%,
+      #007BFE 48%, #008AFE 58%, #0B95FE 68%, #3AA3FE 78%, #6AB4FD 88%, #93C0FE 100%);
   }
 
   /* 子页整页/切页时，状态栏区域就是白顶栏 */
@@ -727,8 +727,10 @@ html[data-page="result"] .tabbar { display: none; }
 
 
 /* ============ 加载状态（黑框 + iOS 菊花） ============
-   尺寸/配色取自原版截图：129.7 x 108.7pt、圆角 5、rgba(0,0,0,.5)、
-   菊花直径约 27pt，白色 12 辐条、圆头。页面不再压暗（压暗会闪烁）。 */
+   尺寸/配色取自原版截图：129.7 x 108.7pt、圆角 5、rgba(0,0,0,.5)。
+   菊花：SVG viewBox 36，辐条外沿半径 13.5（= 元素尺寸的 75%），
+   所以 34px 元素画出来的实际可见直径约 25pt，与实机截图里的 24pt 一致。
+   页面不再压暗（压暗会闪烁）。 */
 .loading {
   position: absolute;
   inset: 0;
@@ -750,8 +752,8 @@ html[data-page="result"] .tabbar { display: none; }
 
 .spinner {
   display: block;
-  width: 27px;
-  height: 27px;
+  width: 34px;
+  height: 34px;
   animation: spinnerSpin 1s steps(12) infinite;
 }
 

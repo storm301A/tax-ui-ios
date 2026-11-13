@@ -69,8 +69,8 @@ function setRoot(name) {
 const SPINNER_SVG = (() => {
   let spokes = '';
   for (let i = 0; i < 12; i++) {
-    const opacity = (1 - i * 0.075).toFixed(3);
-    spokes += `<rect x="16.3" y="4.5" width="3.4" height="8.5" rx="1.7" fill="#fff" `
+    const opacity = (1 - i * 0.06).toFixed(3);
+    spokes += `<rect x="16.8" y="4.5" width="2.4" height="8.5" rx="1.2" fill="#fff" `
       + `opacity="${opacity}" transform="rotate(${i * 30} 18 18)"/>`;
   }
   return `<svg viewBox="0 0 36 36"><g>${spokes}</g></svg>`;
