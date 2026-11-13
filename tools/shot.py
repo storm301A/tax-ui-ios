@@ -15,6 +15,9 @@ inject = """
   :root { --safe-top: 59px !important; --safe-bottom: 34px !important; }
   html, body { width: 393px !important; height: 852px !important; overflow: hidden !important; }
   .page { inset: 0 !important; width: 393px !important; height: 852px !important; }
+  /* position:fixed 相对的是浏览器视口（headless 里恒为 468 宽），不是 html；
+     这里按真机 393x852 钉死，启动页截图才不会被放大裁切 */
+  .splash { inset: 0 !important; width: 393px !important; height: 852px !important; }
   .tabbar { position: absolute !important; left: 10px !important; right: auto !important; top: 766.3px !important; bottom: auto !important; width: 373px !important; }
   *, *::before, *::after { animation-duration: 0s !important; }
   .spinner { animation: none !important; }
@@ -23,6 +26,11 @@ inject = """
 
 </style>
 <script>
+  // 本地抓屏默认跳过启动页（否则 500ms 后会挡住要核对的页面）；
+  // 仅 ?splash=1 时保留，用来验证启动页本身。
+  if (!new URLSearchParams(location.search).get('splash')) {
+    document.documentElement.classList.add('splash-skip');
+  }
   // 记录元素几何，便于 ?rects=1 时 dump
   window.addEventListener('load', () => {
     const q = new URLSearchParams(location.search);

@@ -123,6 +123,36 @@ html[data-page="query"] .page--query,
 html[data-page="result"] .page--result,
 html[data-page="profile"] .page--profile { visibility: visible; }
 
+/* ============ 启动页（App 冷启动显示 0.5 秒） ============ */
+/* 图片 1179x2556 = 393x852pt @3x，与 iPhone 15 Pro 屏幕同为 0.4613 宽高比，
+   object-fit: cover 正好 1:1 铺满，不会拉伸。 */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  background: #FFFFFF;
+}
+
+.splash img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.splash.is-gone {
+  opacity: 0;
+  transition: opacity .2s ease;
+  pointer-events: none;
+}
+
+html.splash-skip .splash { display: none; }
+
+/* 启动页期间系统会隐藏状态栏，safe-area-inset-top 有可能跟着变；
+   钉成 59pt（iPhone 15 Pro）保证 0.5 秒后状态栏回来时首页不上跳 */
+html.splash-on { --safe-top: 59px; }
+
 /* ============ 页面容器 ============ */
 .page {
   position: fixed;
