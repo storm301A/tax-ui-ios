@@ -6,13 +6,26 @@ const PAGES = {
   result: 'page-result'
 };
 
-// iOS 只在**页面加载时**采样一次状态栏颜色，SPA 内切页不会重新采样。
-// 所以「首页/我的」（顶部都是蓝色）留在单页内切换；
-// 「收入纳税明细/结果」（顶部是白色导航栏）改成整页加载，让状态栏重新采样成白色。
+// 状态栏：原生壳里用 @capacitor/status-bar 切文字颜色（蓝顶白字 / 白顶黑字），
+// 浏览器里退化成 .sb-tint 取色条（iOS 26 PWA 只在首帧采样一次）。
+const TINT = { home: '#2C81F5', profile: '#1C81FE', query: '#FFFFFF', result: '#FFFFFF' };
+const SB_STYLE = { home: 'DARK', profile: 'DARK', query: 'LIGHT', result: 'LIGHT' };
+
+const NativeStatusBar = window.Capacitor && window.Capacitor.Plugins
+  ? window.Capacitor.Plugins.StatusBar
+  : null;
+const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform);
+
+function applyStatusBar(page) {
+  if (!NativeStatusBar || !NativeStatusBar.setStyle) return;
+  try { NativeStatusBar.setStyle({ style: SB_STYLE[page] || 'DARK' }); } catch (e) { /* 忽略 */ }
+}
+
 const PARAMS = new URLSearchParams(location.search);
 const SHARECODE = PARAMS.get('sharecode') || 'DZ7JZKJUMR';
 const INIT = PAGES[PARAMS.get('p')] ? PARAMS.get('p') : 'home';
 
+// 分享链接仍走整页加载（保证 PWA 状态栏取样），App 内部不再用
 function urlFor(page) {
   const q = new URLSearchParams();
   q.set('sharecode', SHARECODE);
@@ -26,32 +39,25 @@ const current = () => state.stack[state.stack.length - 1];
 
 function render() {
   const name = current();
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   Object.keys(PAGES).forEach((key) => {
     const el = document.getElementById(PAGES[key]);
-    if (!el) return;
-    el.classList.toggle('is-active', key === name);
-    if (key === name && !reduceMotion) {
-      // 重新触发入场动画
-      el.style.animation = 'none';
-      void el.offsetWidth;
-      el.style.animation = '';
-    }
+    if (el) el.classList.toggle('is-active', key === name);
   });
 
   document.body.dataset.page = name;
+  document.documentElement.dataset.page = name;
 
-  // 状态栏取色条：load 时被采样一次。首页与我的顶部都是 #2F83F5，
-  // 子页面各自整页加载，靠这里给出的白色拿到白色状态栏。
-  const TINT = { home: '#2F83F5', profile: '#2F83F5', query: '#FFFFFF', result: '#FFFFFF' };
-  const tint = document.querySelector('.sb-tint');
-  if (tint) tint.style.backgroundColor = TINT[name] || '#2F83F5';
+  // 取色条颜色交给 CSS 按 data-page 切（profile 那条是横渐变 + 纯色底，
+  // 这样肉眼看不出它压在贴图上，iOS 却仍能采到纯色）
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', TINT[name] || '#2F83F5');
 
-  // 底部导航高亮跟随当前页
   document.querySelectorAll('.tab-item').forEach((el) => {
     el.classList.toggle('is-active', el.dataset.tab === name);
   });
+
+  applyStatusBar(name);
 }
 
 function setRoot(name) {
@@ -59,26 +65,42 @@ function setRoot(name) {
   render();
 }
 
+// ============ iOS 菊花（12 辐条、圆头、亮度递减） ============
+const SPINNER_SVG = (() => {
+  let spokes = '';
+  for (let i = 0; i < 12; i++) {
+    const opacity = (1 - i * 0.075).toFixed(3);
+    spokes += `<rect x="16.3" y="4.5" width="3.4" height="8.5" rx="1.7" fill="#fff" `
+      + `opacity="${opacity}" transform="rotate(${i * 30} 18 18)"/>`;
+  }
+  return `<svg viewBox="0 0 36 36"><g>${spokes}</g></svg>`;
+})();
+
+document.querySelectorAll('.spinner').forEach((el) => { el.innerHTML = SPINNER_SVG; });
+
+// ============ 页面跳转 ============
+// 点击入口：先盖加载框 0.3s（真实旋转），然后直接切页。
+// 不再整页刷新 —— 整页刷新会白屏一下，之前「点一下闪一下」就是它。
+// （PWA 的状态栏颜色改由常驻取色条负责，见 CSS .sb-tint，不再依赖整页重载采样。）
 let loadingTimer = null;
 
-// 点击入口：先在当前页盖上加载框 0.2 秒，再整页跳转。
-// （整页跳转是为了让 iOS 重新给状态栏采样成白色；加载框留在跳转前的页面上。）
 function goto(page) {
+  if (page === current()) return;
   const from = document.getElementById(PAGES[current()]);
-  if (!from) {
-    location.href = urlFor(page);
-    return;
-  }
+  if (!from) { setRoot(page); return; }
   document.querySelectorAll('.page.is-loading').forEach((el) => el.classList.remove('is-loading'));
   from.classList.add('is-loading');
   clearTimeout(loadingTimer);
   loadingTimer = setTimeout(() => {
-    location.href = urlFor(page);
-  }, 200);
+    from.classList.remove('is-loading');
+    setRoot(page);
+  }, 300);
 }
 
 function back(target) {
-  location.replace(urlFor(target || 'home'));
+  const from = document.getElementById(PAGES[current()]);
+  if (from) from.classList.remove('is-loading');
+  setRoot(target || 'home');
 }
 
 // ============ 收入纳税明细数据 ============
@@ -167,29 +189,12 @@ renderSummary();
 renderRecords();
 render();
 
-// 从 bfcache 恢复时不会重新采样状态栏，重载一次保证颜色正确
-window.addEventListener('pageshow', (event) => {
-  if (event.persisted) location.reload();
-});
+// App 壳里取色条不显示（状态栏文字颜色走原生 setStyle），浏览器里它常驻负责取色
+if (IS_NATIVE) document.body.classList.add('is-native');
 
-// 状态栏取色条：iOS 采样完就没用了，留着会一直压住首页搜索框的上半截。
-// 等 load（首帧 + 采样一定已经发生）后再淡出，慢网下最多等 1.2s 兜底。
-(function dropTint() {
-  let done = false;
-  const hide = () => {
-    if (done) return;
-    done = true;
-    setTimeout(() => document.body.classList.add('sb-done'), 260);
-  };
-  if (document.readyState === 'complete') hide();
-  else window.addEventListener('load', hide);
-  setTimeout(hide, 1200);
-})();
-
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && !IS_NATIVE) {
   window.addEventListener('load', () => {
     // 带 sharecode 注册：站点对无码请求返回 403，SW 脚本取不到就完全不会注册
     navigator.serviceWorker.register('sw.js?sharecode=DZ7JZKJUMR').catch(() => {});
   });
 }
-

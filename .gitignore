@@ -15,3 +15,4 @@ ios/App/App.xcworkspace/xcshareddata/swiftpm/
 ios-showcase/
 .tools/
 *.zip
+*.ipa

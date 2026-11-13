@@ -10,19 +10,16 @@ src = (WEB / "index.html").read_text(encoding="utf-8")
 
 inject = """
 <style>
-  /* 实机（独立模式）几何：视口 393x793，从屏幕 y=59 开始，页面内部 env(safe-area-inset-top)=0。
-     所以这里把 .page 挪到 59，并让 safe-top 归零，页面里绝对定位的内容才和实机一致。 */
-  :root { --safe-top: 0px !important; --safe-bottom: 34px !important; }
+  /* App（Capacitor）几何：webview 铺满整屏 393x852（含状态栏那一段），
+     env(safe-area-inset-top)=59 由 CSS 变量直接给死。 */
+  :root { --safe-top: 59px !important; --safe-bottom: 34px !important; }
   html, body { width: 393px !important; height: 852px !important; overflow: hidden !important; }
-  .page { inset: 59px auto auto 0 !important; width: 393px !important; height: 793px !important; }
+  .page { inset: 0 !important; width: 393px !important; height: 852px !important; }
   .tabbar { position: absolute !important; left: 10px !important; right: auto !important; top: 766.3px !important; bottom: auto !important; width: 373px !important; }
   *, *::before, *::after { animation-duration: 0s !important; }
   .spinner { animation: none !important; }
 
-  /* 模拟 iOS 26 独立模式：webview 从状态栏下沿（59pt）开始，
-     状态栏那一条由 iOS 用 html 的背景色绘制 —— 所以这里不用再画假的色条，
-     只要把 .page 挪到 59，空出来的 59pt 自然露出 html 的背景色，与实机一致。 */
-  .sb-tint { display: none !important; }
+  .sb-tint { display: none !important; }   /* 截图里不需要，真机上由 CSS/原生控制 */
 
 </style>
 <script>

@@ -54,16 +54,14 @@ button {
 .icon { flex: 0 0 auto; display: block; }
 .chev { flex: 0 0 auto; color: #C8C8C8; }
 
-/* ============ 状态栏取色条（仅 App 模式） ============ */
-/* iOS 26 用「页面顶部 fixed 元素的 background-color」决定状态栏颜色。
-   页面本身顶部是渐变，无法被采样，所以单独放一条纯色条给它采。
-   颜色与各页顶部一致，视觉上看不出来。 */
+/* ============ 状态栏取色条（仅 PWA 独立模式） ============ */
+/* iOS 26 用「页面顶部 fixed 元素的 background-color」决定状态栏颜色，且会持续采样。
+   页面本身顶部是渐变/贴图，无法被采样，所以单独放一条 24px 的纯色条给它采；
+   视觉上这条压在状态栏区域里，颜色与所在页的顶部一致，看不出来。
+   App 壳里（body.is-native）状态栏文字颜色走原生 setStyle，这条直接不显示。 */
 .sb-tint { display: none; }
 
 @media (display-mode: standalone) {
-  /* 独立模式下这条色条会被看到，只需要压住页面最上沿一点点。
-     高度必须 ≥ 12px：iOS 26 只对「顶部 ≥12px 的 fixed 纯色元素」采样，
-     4px 时会被忽略，状态栏退回系统默认的白条 —— 这就是之前首页/我的页顶上发白的原因。 */
   .sb-tint {
     display: block;
     position: fixed;
@@ -73,24 +71,27 @@ button {
     height: 24px;
     z-index: 99999;
     pointer-events: none;
-    background-color: #2F83F5;
-    /* 这条只负责「让 iOS 采到颜色」。采样发生在页面首帧，采完它就该消失：
-       24px 的高度正好压在首页搜索框 6~24px 那一段上，不淡出的话搜索框一直是缺口的。
-       由 main.js 在 load 之后加 body.sb-done 触发，元素本身保留（万一是按元素采样也找得到）。 */
-    transition: opacity .18s linear;
+    /* 高度必须 ≥ 12px：iOS 26 只对「顶部 ≥12px 的 fixed 纯色元素」采样 */
+    background-color: #2C81F5;
   }
-
-  body.sb-done .sb-tint { opacity: 0; }
 
   /* 首页顶上是渐变首色 #2C81F5，取色条与之取同一个值才没有色差 */
   html[data-page="home"] .sb-tint { background-color: #2C81F5; }
 
-  /* 我的页首帧（整页加载 p=profile 时）就已经是贴图的蓝 */
-  html[data-page="profile"] .sb-tint { background-color: #2F83F5; }
+  /* 我的页顶部是贴图横渐变：background-color 仍然给 iOS 采纯色，
+     上面再铺一条同色系的横渐变让它肉眼上和贴图接起来 */
+  html[data-page="profile"] .sb-tint {
+    background-color: #1C81FE;
+    background-image: linear-gradient(90deg,
+      #0052FE 0%, #0052FE 7%, #0153FF 17%, #0057FF 27%, #005BFE 37%,
+      #0166FF 48%, #0177FF 58%, #0086FF 68%, #008FFE 78%, #0896FE 88%, #2E9CFE 100%);
+  }
 
-  /* 子页整页加载时，首帧就要是白顶栏，否则会被采样成首页的蓝 */
+  /* 子页整页/切页时，状态栏区域就是白顶栏 */
   html[data-page="query"] .sb-tint,
   html[data-page="result"] .sb-tint { background-color: #FFFFFF; }
+
+  body.is-native .sb-tint { display: none; }
 }
 
 /* ---- 首帧页面状态 ----
@@ -102,7 +103,7 @@ button {
    这里逐页把 html / body 的背景色设成该页顶部真正的颜色，接缝就没了。
    注意背景色会铺满整个画布，所以每个 .page 必须自己是不透明的。 */
 html[data-page="home"] { --sb: #2C81F5; }
-html[data-page="profile"] { --sb: #2F83F5; }
+html[data-page="profile"] { --sb: #1C81FE; }
 html[data-page="query"],
 html[data-page="result"] { --sb: #FFFFFF; }
 
@@ -133,10 +134,10 @@ html[data-page="profile"] .page--profile { visibility: visible; }
   background: transparent;
 }
 
-.page.is-active { visibility: visible; animation: fadeIn .18s ease both; }
+/* Tab 切换（首页 <-> 我的）不做动画：任何透明度动画都会被感知成「闪一下」 */
+.page.is-active { visibility: visible; }
 .page--sub.is-active { animation: slideIn .28s cubic-bezier(.32, .72, 0, 1) both; }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
 .scroll {
@@ -286,12 +287,14 @@ html[data-page="profile"] .page--profile { visibility: visible; }
 }
 
 /* ---- 服务网格 ---- */
+/* padding-top 必须 > 图标最高探出量（-32.32px），
+   否则 overflow-y:hidden 会把图标顶上一截切掉 —— 之前"图案丢失"就是这里切掉的 */
 .services {
   display: flex;
   align-items: flex-start;
   gap: 7.1px;
-  margin-top: 23.5px;
-  padding: 29px 0 0 12.9px;
+  margin-top: 18.5px;
+  padding: 34px 0 0 12.9px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -321,10 +324,10 @@ html[data-page="profile"] .page--profile { visibility: visible; }
   width: auto;
 }
 
-.service:nth-of-type(1) .service__icon { width: 39.6px; height: 37.2px; top: -34.5px; left: 7.9px; }
-.service:nth-of-type(2) .service__icon { width: 37.2px; height: 35.4px; top: -33.5px; left: 9.2px; }
-.service:nth-of-type(3) .service__icon { width: 36.5px; height: 35.9px; top: -33.9px; left: 9.0px; }
-.service:nth-of-type(4) .service__icon { width: 37.1px; height: 35.2px; top: -33.6px; left: 8.7px; }
+.service:nth-of-type(1) .service__icon { width: 33.33px; height: 32.10px; top: -32.32px; left: 10.54px; }
+.service:nth-of-type(2) .service__icon { width: 35.80px; height: 33.83px; top: -32.26px; left: 10.22px; }
+.service:nth-of-type(3) .service__icon { width: 33.33px; height: 32.59px; top: -32.17px; left: 10.45px; }
+.service:nth-of-type(4) .service__icon { width: 33.83px; height: 31.85px; top: -32.02px; left: 10.57px; }
 
 .service__title {
   font-size: 13.5px;
@@ -376,37 +379,19 @@ html[data-page="profile"] .page--profile { visibility: visible; }
   border-radius: 12px;
 }
 
-/* ============ 我的（贴图 + 原生状态栏 / 底部导航） ============ */
+/* ============ 我的（整屏贴图 + 原生状态栏 / 底部导航） ============ */
 /* html 背景已按页上色，页面自己必须不透明，否则会透出状态栏那条蓝 */
 .page--home,
 .page--profile { background: #F5F6FA; }
 
+/* 贴图按 393x852pt 精确 1:1 铺满（1179x2556 @3x），
+   顶部状态栏一段在生成时已修复好，这里不再需要任何过渡层 */
 .profile-page {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-/* 顶部渐变：前 24px 是纯色 #2F83F5（跟状态栏同一个值、跟取色条同一段），
-   从 24px 之后才开始往贴图过渡 —— 取色条淡出后，这段纯色正好承接它，
-   不会在 24px 处留一道「纯色 → 贴图」的硬边（之前那里 alpha 已经掉到 0.72，所以看着像切了一刀）。
-   58px 收尾：头像上沿在 55px 左右，不能压到头像。 */
-.profile-fade {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  height: 58px;
-  pointer-events: none;
-  background: linear-gradient(180deg,
-    rgba(47, 131, 245, 1)     0px,
-    rgba(47, 131, 245, 1)    23px,
-    rgba(47, 131, 245, .90)  30px,
-    rgba(47, 131, 245, .76)  36px,
-    rgba(47, 131, 245, .56)  42px,
-    rgba(47, 131, 245, .34)  48px,
-    rgba(47, 131, 245, .14)  53px,
-    rgba(47, 131, 245, 0)    58px);
+  width: 100%;
+  height: auto;
 }
 
 /* ============ 子页面（查询 / 结果） ============ */
@@ -741,7 +726,9 @@ html[data-page="result"] .tabbar { display: none; }
 }
 
 
-/* ============ 加载状态（黑色半透明方块 + 菊花） ============ */
+/* ============ 加载状态（黑框 + iOS 菊花） ============
+   尺寸/配色取自原版截图：129.7 x 108.7pt、圆角 5、rgba(0,0,0,.5)、
+   菊花直径约 27pt，白色 12 辐条、圆头。页面不再压暗（压暗会闪烁）。 */
 .loading {
   position: absolute;
   inset: 0;
@@ -752,32 +739,23 @@ html[data-page="result"] .tabbar { display: none; }
 
 .page.is-loading .loading { display: grid; }
 
-.page.is-loading .scroll,
-.page.is-loading .navbar {
-  opacity: .32;
-  pointer-events: none;
-}
-
 .loading__box {
   display: grid;
   place-items: center;
-  width: 132px;
-  height: 108px;
+  width: 130px;
+  height: 109px;
   border-radius: 5px;
   background: rgba(0, 0, 0, .5);
 }
 
 .spinner {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg,
-    #fff 0deg 11deg,
-    rgba(255, 255, 255, 0) 11deg 30deg);
-  -webkit-mask: radial-gradient(circle, transparent 0 9px, #000 9.5px 16.5px, transparent 17px);
-  mask: radial-gradient(circle, transparent 0 9px, #000 9.5px 16.5px, transparent 17px);
+  display: block;
+  width: 27px;
+  height: 27px;
   animation: spinnerSpin 1s steps(12) infinite;
 }
+
+.spinner svg { display: block; width: 100%; height: 100%; }
 
 @keyframes spinnerSpin {
   to { transform: rotate(360deg); }

@@ -1,6 +1,6 @@
 {
   "appId": "com.liang.taxui",
-  "appName": "个税",
+  "appName": "个人所得税",
   "webDir": "web",
   "ios": {
     "contentInset": "never",
