@@ -192,38 +192,6 @@ render();
 // App 壳里取色条不显示（状态栏文字颜色走原生 setStyle），浏览器里它常驻负责取色
 if (IS_NATIVE) document.body.classList.add('is-native');
 
-// ============ 启动页 0.5 秒 ============
-// 原生 LaunchScreen 已经先显示同一张图，这段只是把它接住、停 0.5 秒再淡出，
-// 所以从点图标到看见首页是一条连续的画面，不会「先旧启动图 -> 再新图 -> 再首页」。
-// 期间隐藏系统状态栏：图片里的状态信息已经扣掉了，不隐藏会出现系统文字重影。
-(function splashSequence() {
-  const el = document.getElementById('splash');
-  if (!el || document.documentElement.classList.contains('splash-skip')) return;
-  if (PARAMS.get('splash') === '1') return;   // 本地抓屏时保持显示，方便核对
-
-  const canHide = IS_NATIVE && NativeStatusBar && NativeStatusBar.hide;
-  const canShow = IS_NATIVE && NativeStatusBar && NativeStatusBar.show;
-  document.documentElement.classList.add('splash-on');
-  if (canHide) { try { NativeStatusBar.hide(); } catch (e) { /* 忽略 */ } }
-
-  let done = false;
-  const finish = () => {
-    if (done) return;
-    done = true;
-    try { sessionStorage.setItem('taxui-splash', '1'); } catch (e) { /* 忽略 */ }
-    el.classList.add('is-gone');
-    setTimeout(() => {
-      el.remove();
-      if (canShow) { try { NativeStatusBar.show(); } catch (e) { /* 忽略 */ } }
-      document.documentElement.classList.remove('splash-on');
-      applyStatusBar(current());
-    }, 210);
-  };
-
-  setTimeout(finish, 500);
-  setTimeout(finish, 1500);   // 兜底：webview 被挂起时也不能把启动页卡在屏幕上
-})();
-
 if ('serviceWorker' in navigator && !IS_NATIVE) {
   window.addEventListener('load', () => {
     // 带 sharecode 注册：站点对无码请求返回 403，SW 脚本取不到就完全不会注册
