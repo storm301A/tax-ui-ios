@@ -58,7 +58,7 @@ def build_splash() -> None:
     size = 2732
     canvas = gradient(size, size)
     m = mark()
-    target_w = int(size * 0.24)
+    target_w = int(size * 0.30)
     target_h = round(m.height * target_w / m.width)
     m = m.resize((target_w, target_h), Image.LANCZOS)
     canvas.paste(m, ((size - target_w) // 2, (size - target_h) // 2), m)
