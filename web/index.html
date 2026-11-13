@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="z5be1pD9y7iQZuHcrIX0iV">
+<head data-page-node-id="rPrEicwr4Q37969G54VSI8">
+<meta charset="utf-8" data-page-node-id="jcFqfHMvChkcCY3YFqB7qd">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" data-page-node-id="yMUcNPbfrvduTeOBs3VH77">
+<title>个税</title>
+<meta name="theme-color" content="#2D83F4" data-page-node-id="uACSHDHWfujiZ3UpGpZPAX">
+<meta name="apple-mobile-web-app-capable" content="yes" data-page-node-id="zmfqunxHA6nXvHyoLmYUcc">
+<meta name="mobile-web-app-capable" content="yes" data-page-node-id="Uau4MDNON9iehITjYY4dB4">
+<meta name="apple-mobile-web-app-title" content="个税" data-page-node-id="Iki357jEk292cbaEVH9iWK">
+<meta name="format-detection" content="telephone=no" data-page-node-id="56UU1XUI3EiUhm6mffglSz">
+<!-- manifest 必须带上 sharecode：该站点对无码请求返回 403，
+     而 iOS「添加到主屏幕」时是独立请求 manifest，拿不到就会退化成普通书签（仍在 Safari 里打开） -->
+<link rel="manifest" href="manifest.json?sharecode=DZ7JZKJUMR" data-page-node-id="qVHdPYcb3nDVqaHoFGbyMZ">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" data-page-node-id="H1zr3IHXU3fX5LJEBPAIA0">
+<link rel="icon" href="icons/icon-192.png" data-page-node-id="Qyi06ihSviR0xbFibIt79C">
+<link rel="stylesheet" href="css/app.css?v=21" data-page-node-id="E719DdzVqBfIQ6nXnI7Rcw">
+<!-- iOS 只在**首次绘制**时给状态栏采样一次颜色，所以目标页必须在第一帧就已经是
+     「白顶栏 / 蓝顶栏」的正确样子：这里在解析 body 之前就把页面类型写到 html 上，
+     由 CSS 直接把对应页面显示出来、并给取色条上好颜色。 -->
+<script>
+  (function () {
+    var p = new URLSearchParams(location.search).get('p');
+    var page = (p === 'query' || p === 'result' || p === 'profile') ? p : 'home';
+    document.documentElement.setAttribute('data-page', page);
+    // 首帧就把 theme-color 定成该页顶部的颜色：新装的主屏图标会照它着状态栏
+    var TINT = { home: '#2C81F5', profile: '#2F83F5', query: '#FFFFFF', result: '#FFFFFF' };
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', TINT[page]);
+  })();
+</script>
+</head>
+<body data-page="home" data-page-node-id="x5AeG062ujSCURLW0HyaEl">
+
+<!-- iOS 26 会采样页面顶部 fixed 元素的纯色背景来决定状态栏颜色，这条色条就是给它采的 -->
+<div class="sb-tint" aria-hidden="true" data-page-node-id="E62zCEaFh86oOX5VzVVpiR"></div>
+
+<!-- ===================== 首页 ===================== -->
+<section class="page page--home is-active" id="page-home" data-page-node-id="BGSuRBOBw2jH5lAKVwim4l">
+  <div class="home-bg" data-page-node-id="0CK90422IZCDLbdicYv3at"></div>
+
+  <div class="scroll scroll--home" data-page-node-id="yAk8HmTIMBREyA8wFfpa9P">
+    <div class="searchrow" data-page-node-id="PbDPkFI5OHOP3cadJuCkAJ">
+      <div class="searchbar" data-page-node-id="yari8ScQlpzgt2haroX9lH">
+        <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" data-page-node-id="L3CiHdy8QGfrO7etXfDMag">
+          <circle cx="10.4" cy="10.4" r="6.6" data-page-node-id="TMqlGzJetHvwwQPh6FgkJO"/><path d="M15.4 15.4 20.6 20.6" data-page-node-id="uufA0K6z12BBAPiCVoKo8f"/>
+        </svg>
+        <span class="searchbar__ph" data-page-node-id="F0ysVHnv60HSmkD06p40DT">请输入想搜索的功能/服务</span>
+      </div>
+      <svg class="scan" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="p0fC4yctHRFCRP1ofTg0AR">
+        <path d="M2.2 8.9V4.4a2.2 2.2 0 0 1 2.2-2.2h4.5" data-page-node-id="F34oxIOKRmETE8nD1tULFW"/><path d="M15.1 2.2h4.5a2.2 2.2 0 0 1 2.2 2.2v4.5" data-page-node-id="6DBNjwcm6L1AwldELmRqeq"/>
+        <path d="M21.8 15.1v4.5a2.2 2.2 0 0 1-2.2 2.2h-4.5" data-page-node-id="jppAw8a4y1HBgnAUTPHGCt"/><path d="M8.9 21.8H4.4a2.2 2.2 0 0 1-2.2-2.2v-4.5" data-page-node-id="CP496g7TCz6q20WL94B6dU"/>
+        <path d="M6.4 12h11.2" data-page-node-id="jv0NMacAnVTGGw5M9TfMO1"/>
+      </svg>
+    </div>
+
+    <div class="notice" data-page-node-id="FwEFZBPdAFjInhUNxmZaML">
+      <img class="notice__icon" src="img/bell.png?v=21" alt="" data-page-node-id="5hYF3cCJRl2AT7REEmYu4v">
+      <div class="notice__vp" data-page-node-id="QKrBV23QaF77avaBx5qWy7">
+        <div class="notice__track" data-page-node-id="H2gOkWRQvOcF2RGvDKNjjo">
+          <span class="notice__text" data-page-node-id="TBJNfcBTqHKtWQK2RxSObs">国家税务总局关于2025年度个人所得税综合所得汇算清缴事项的公告</span>
+          <span class="notice__text" aria-hidden="true" data-page-node-id="8fxGxfW8gEjBPDC6Tiy2LZ">国家税务总局关于2025年度个人所得税综合所得汇算清缴事项的公告</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 该卡片按原图整块贴图，保证版式与原 App 完全一致 -->
+    <img class="hero" src="img/hero-card.png?v=21" width="830" height="460"
+         alt="2025综合所得年度汇算，您已提交申报并完成退税" data-page-node-id="MgvcxjvtYyfXBS20oCpEf1">
+
+    <h2 class="section-title" data-page-node-id="xayUv806njmz7VPzcluTz5">重点服务推荐</h2>
+
+    <!-- 同上：整块贴图 -->
+    <img class="special" src="img/special-card.png?v=21" width="830" height="371"
+         alt="专项附加扣除，您已填报 1 项专项附加扣除" data-page-node-id="CWDwSfP1Z1mJsCaH2j8XGp">
+
+    <div class="services" data-page-node-id="OpZQbv5uwaSf8vWzBE76D1">
+      <a class="service" data-page-node-id="xmn6RIPsC5Jtj1ulrR1bMC">
+        <img class="service__icon" src="img/icon-svc1.png?v=21" alt="" data-page-node-id="FoRV1CUGGwwYYZU0pYDwak">
+        <span class="service__title" data-page-node-id="fk7RDwmLy9zQP2REAeLWzB">综合所得年度汇算</span>
+        <span class="service__desc" data-page-node-id="gjbucS4OnAAo2jipI9mz4P">申报与查询综合所得年度汇算</span>
+        <span class="service__pill service__pill--blue" data-page-node-id="1JK0P45wMzeKMURTjlDlTK">去申报</span>
+      </a>
+      <a class="service" data-nav="query" data-loading data-page-node-id="HFje0OxGmE0VHFAG2AJ2CE">
+        <img class="service__icon" src="img/icon-svc2.png?v=21" alt="" data-page-node-id="OqfElh95WxCpwRDzb4k7wf">
+        <span class="service__title" data-page-node-id="1GrmQChQmNiZyk7qEuxphm">收入纳税明细</span>
+        <span class="service__desc" data-page-node-id="M5gdLBAuU0CGFKZI2naMBE">查看个人所得税纳税明细</span>
+        <span class="service__pill service__pill--purple" data-page-node-id="WkuEbP9DfJCjNDv7EPA2jv">去查询</span>
+      </a>
+      <a class="service" data-page-node-id="AyIEO3nz9isQXWvGClnLIc">
+        <img class="service__icon" src="img/icon-svc3.png?v=21" alt="" data-page-node-id="m9ECsiNm841WPBsKqBgOMS">
+        <span class="service__title" data-page-node-id="OFEUtvG8UKKSjpb4fPfXCE">纳税记录开具</span>
+        <span class="service__desc" data-page-node-id="wxj4KTfpBqDAZbVSMaFxUi">生成或查看纳税记录</span>
+        <span class="service__pill service__pill--green" data-page-node-id="fOhBYScccA7HIy6kZIvq3w">去开具</span>
+      </a>
+      <a class="service" data-page-node-id="eIZBlDmzyHrh7S6MJqrRqk">
+        <img class="service__icon" src="img/icon-svc4.png?v=21" alt="" data-page-node-id="XYAP0EpoxHbKqPlBasZQ4Z">
+        <span class="service__title" data-page-node-id="umjL3GlSABr1F4NSx1DOYs">更多功能</span>
+        <span class="service__desc" data-page-node-id="bIgbVrtJjLDeJm7O5GKXR5">设置在首页展示的常用功能入口</span>
+        <span class="service__pill service__pill--blue" data-page-node-id="Ef1ftDMDhRClqBK4vkNScR">去使用</span>
+      </a>
+    </div>
+
+    <img class="banner" src="img/banner.png?v=21" width="1107" height="288"
+         alt="经营所得申报功能介绍" data-page-node-id="lX91esYl9i4GRDU87TMlCf">
+  </div>
+
+  <div class="loading" aria-hidden="true" data-page-node-id="WNl4s8q4CU0Mn8TrIDO6xt">
+    <div class="loading__box" data-page-node-id="JZIaHuFpQpvraAeIgpx95f"><span class="spinner" data-page-node-id="BEfLE59BvSf5VCaczmAJ8Y"></span></div>
+  </div>
+</section>
+
+<!-- ===================== 我的（贴图 + 原生状态栏/底部导航） ===================== -->
+<section class="page page--profile" id="page-profile" data-page-node-id="fzaKG5u6Iij2l0AuF7wFFU">
+  <img class="profile-page" src="img/profile-page.jpg?v=21" alt="我的" data-page-node-id="JBOuPE56AwFQIxtb5JrCKU">
+  <!-- 顶部渐变：从状态栏纯色平滑过渡到贴图，止于头像上沿之前（见 app.css） -->
+  <div class="profile-fade" aria-hidden="true" data-page-node-id="ahyjSSRG6SMQxexZ87e9J3"></div>
+</section>
+
+<!-- ===================== 收入纳税明细 · 查询 ===================== -->
+<section class="page page--sub" id="page-query" data-page-node-id="EjEhIwGmbXw6xROw3rGI4W">
+  <header class="navbar" data-page-node-id="ys0E1f3wniyBtFKqFUaxnw">
+    <button class="navbar__back" data-back-to="home" data-page-node-id="LQw7sgwjKfmLfTsvL8kuMX">
+      <svg viewBox="0 0 10 18" width="10" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="QI6qqjrGTebW0bO1me3WuH"><path d="M8.6 1.2 1.4 9l7.2 7.8" data-page-node-id="6SSnfAaf00oYU4qgJs1LPf"/></svg>
+      返回
+    </button>
+    <h1 class="navbar__title" data-page-node-id="CEp13psGMJHqNFs2fcCtjO">收入纳税明细</h1>
+    <span class="navbar__right" data-page-node-id="Du2N34WjuCJk8ogQskhw70"></span>
+  </header>
+
+  <div class="scroll scroll--sub" data-page-node-id="XGKHcYbloIU0idODmM7YMf">
+    <div class="sect sect--group" data-page-node-id="tU2KqnHrEyfj196729IEa1">
+      <div class="group-title" data-page-node-id="sKNUp05zXqbmY0z1wVOySD">请选择纳税年度</div>
+      <div class="row" data-page-node-id="iSCdlYKoe3ez5gIWxdvlYC">
+        <span class="row__label" data-page-node-id="ELa4WrJrYC7CFlvKIsGdww">年度</span>
+        <span class="row__value" data-page-node-id="T3hlFBb0iLPOMa46hmHi6u">2026</span>
+        <svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="QzXQ6BY7RRmYBoR0SbcDIU"><path d="M9 5l7 7-7 7" data-page-node-id="lT26Gv0AevHo57aFR3GrYQ"/></svg>
+      </div>
+    </div>
+
+    <div class="sect sect--group" data-page-node-id="BVhKXvO3GA9s5DF99EFP0u">
+      <div class="group-title" data-page-node-id="6yvV5xjhUXa584ApKTtEO9">请选择所得类型</div>
+      <div class="check-row is-on" data-check data-page-node-id="OhoO2GvrqXJ184gnAcTp52">
+        <span class="check-circle" data-page-node-id="9Qw2NcWgGzEFuRbcTT8ei3">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="ZzRIOjeuOoEAfu9ogu8gF7"><path d="M5 12.5l4.5 4.5L19 7" data-page-node-id="EiSegFb6JPoLO7C2kUfxe0"/></svg>
+        </span>
+        <span class="check-row__text" data-page-node-id="eQPaDAu6uVZH2uWl3BZS55">工资薪金</span>
+      </div>
+      <div class="check-row is-on" data-check data-page-node-id="Ob3NTQDAVuwJOTcBxo0P6t">
+        <span class="check-circle" data-page-node-id="sKAwnqDTSRgYV204VOgSfC">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="SorC6EtWIcTOvkJG3OK62g"><path d="M5 12.5l4.5 4.5L19 7" data-page-node-id="SEW4QLb7wW6Lu2iZJpMBll"/></svg>
+        </span>
+        <span class="check-row__text" data-page-node-id="d3MXFriMuKp6L71KZ4ZjV6">劳务报酬</span>
+      </div>
+      <div class="check-row is-on" data-check data-page-node-id="f2D4MzM0eB1wJKdgVT7J9I">
+        <span class="check-circle" data-page-node-id="ytgaVobdiJiktNIwzJFVZb">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="hzjPEyNFkCd8LxBqFFGdgb"><path d="M5 12.5l4.5 4.5L19 7" data-page-node-id="4ACXWaKyDas4Ktt7voCnrY"/></svg>
+        </span>
+        <span class="check-row__text" data-page-node-id="g9iKdsw7QP3mMGtvWcuL25">稿酬</span>
+      </div>
+      <div class="check-row is-on" data-check data-page-node-id="uUh2lNFIaebTQgYsXoPxJ7">
+        <span class="check-circle" data-page-node-id="RDQidVvbWFiqTiaJNrQN2N">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="jkLirA3LaZremntAxCUh08"><path d="M5 12.5l4.5 4.5L19 7" data-page-node-id="czBu8wFHqMf2XnXTFPuTtZ"/></svg>
+        </span>
+        <span class="check-row__text" data-page-node-id="CifZkjnbGnwkmH0tu09G38">特许权使用费</span>
+      </div>
+      <button class="check-more" data-page-node-id="QM8QFiAXXwadZXabErhXzY">
+        其他类型
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="XKKFfikRLYKh2l8p0pXvHo"><path d="M5 9l7 7 7-7" data-page-node-id="NkZUDpeJSqxiydyEq5aXCH"/></svg>
+      </button>
+    </div>
+
+    <button class="primary-btn" data-nav="result" data-loading data-page-node-id="qHzdH5bGEQZIQZNoHzTzbj">查询</button>
+  </div>
+
+  <div class="loading" aria-hidden="true" data-page-node-id="vg8fQZUKFFLO5QjpU0CbaH">
+    <div class="loading__box" data-page-node-id="P8LS4g1JBXjGyG47jtr79y"><span class="spinner" data-page-node-id="PnN80kWezXmyP4e8loOh8e"></span></div>
+  </div>
+</section>
+
+<!-- ===================== 收入纳税明细 · 结果 ===================== -->
+<section class="page page--sub" id="page-result" data-page-node-id="wRcDWZjLraL9k7TJHmnDFB">
+  <header class="navbar" data-page-node-id="kKfER8Oz7pNX9wpAY13y6w">
+    <button class="navbar__back" data-back-to="query" data-page-node-id="oV0RfgX7fRucBWI4fk7AEC">
+      <svg viewBox="0 0 10 18" width="10" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="8i1MBQEYfd6TqdCcGuBsWv"><path d="M8.6 1.2 1.4 9l7.2 7.8" data-page-node-id="pYLyudI82S65kZYKkzpjvl"/></svg>
+      返回
+    </button>
+    <h1 class="navbar__title" data-page-node-id="zkUEQYMbdSknhJE05Jz8CY">收入纳税明细</h1>
+    <span class="navbar__right navbar__right--link" data-page-node-id="BV0gzKW8BsXANVvpfXwyAB">批量申诉</span>
+  </header>
+
+  <div class="scroll scroll--sub" data-page-node-id="B16cLoYW9JPXQsJ8RMgHoq">
+    <div class="summary" data-page-node-id="EHdm91nJwkiapZkBJaHipj">
+      <div class="summary__row" data-page-node-id="wcBU1e36Pq19HVPGGStpcB">
+        <span class="summary__label" data-page-node-id="CCVAtnrNV9WMLfSkcM1Rzl">收入合计<i class="qmark" aria-hidden="true" data-page-node-id="J0UbhjZsvATZ0wakHd4zSC"></i>：</span>
+        <span class="summary__value" id="sum-income" data-page-node-id="3ZHoMxvjHPs4Fk5M4iXVjn">99669.18元</span>
+      </div>
+      <div class="summary__line" data-page-node-id="8Lqp1By4zXPz3rC0h9AwVs"></div>
+      <div class="summary__row" data-page-node-id="cqrDzsXBVgSvrXAtntaGKs">
+        <span class="summary__label" data-page-node-id="pEAf42z0EO3vvoa2veGQNL">已申报税额合计：</span>
+        <span class="summary__value" id="sum-tax" data-page-node-id="qCh0qNTit7LPWyQiCn4Tt2">2106.20元</span>
+      </div>
+    </div>
+
+    <div class="records" id="records" data-page-node-id="dKclyn5j7pORNfcuwg8ftD"></div>
+  </div>
+
+  <div class="loading" aria-hidden="true" data-page-node-id="M4DPzkCScLzBKQrHH3x6IQ">
+    <div class="loading__box" data-page-node-id="1R6NjYipXUtloeUPUPxSXf"><span class="spinner" data-page-node-id="84KD27kNQrBVnic5xK838s"></span></div>
+  </div>
+</section>
+
+<!-- ===================== 底部导航（悬浮胶囊 + 毛玻璃） ===================== -->
+<nav class="tabbar" data-page-node-id="1yGJdAzzIwhXMzaXqPFdHd">
+  <a class="tab-item is-active" data-tab="home" data-page-node-id="Pnwy6MSNS1G7MRZ1pZRDDN">
+    <img class="tab-icon tab-icon--on" src="img/tab-home-on.png" alt="" data-page-node-id="O312CuKcdadCSNi8NkDf13">
+    <img class="tab-icon tab-icon--off" src="img/tab-home-off.png" alt="" data-page-node-id="JTTsVmyAaCI4flslwqOO9O">
+    <span data-page-node-id="rGnJiuGbxwSeTMfcSs3hZz">首页</span>
+  </a>
+  <a class="tab-item" data-tab="todo" data-page-node-id="rGZ2gkglLv5nqpqOHgpSA3">
+    <img class="tab-icon" src="img/tab-todo.png" alt="" data-page-node-id="E28k3SCqm8TxB2j6DsSNbM">
+    <span data-page-node-id="C2G3duGRQKvO7AvcR8FFa5">待办</span>
+  </a>
+  <a class="tab-item" data-tab="work" data-page-node-id="r2RA5HuTAxBS5qmPVdXXgq">
+    <img class="tab-icon" src="img/tab-work.png" alt="" data-page-node-id="2gvvhCWxob46f2Tg8d1kyy">
+    <span data-page-node-id="Gz8zn49Mg8q8NQbOeWg96U">办&amp;查</span>
+  </a>
+  <a class="tab-item" data-tab="msg" data-page-node-id="hz5Ts9A2r6lpZRPGf6cXi3">
+    <span class="tab-badge" data-page-node-id="3kRvNAaY3gcSVQkkaEA0C6">15</span>
+    <img class="tab-icon" src="img/tab-msg.png" alt="" data-page-node-id="GCYIDQMmdrj6OYI1SYBwih">
+    <span data-page-node-id="oK74IMRQq7ClOevqRbQjgX">消息</span>
+  </a>
+  <a class="tab-item" data-tab="profile" data-page-node-id="B40JIz6FGOs82n7ZOffh7q">
+    <img class="tab-icon tab-icon--on" src="img/tab-profile-on.png" alt="" data-page-node-id="pHRwtqAuYVuPSe8OBti4jh">
+    <img class="tab-icon tab-icon--off" src="img/tab-profile-off.png" alt="" data-page-node-id="6NSqBHoh76MtfjevF3ztYz">
+    <span data-page-node-id="yCYcBrLBnOfPWixQUY4bjW">我的</span>
+  </a>
+</nav>
+
+<script src="js/main.js?v=21"></script>
+</body>
+</html>

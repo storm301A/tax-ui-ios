@@ -1,0 +1,784 @@
+/* ================================================================
+   个税界面复刻 · 仅适配 iPhone 15 Pro（393 × 852pt，安全区 59/34）
+   ================================================================ */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+:root {
+  --blue: #3D86F6;
+  --btn-blue: #4A7CF0;
+  --ios-blue: #0A7AFF;
+  --text: #1C1C1E;
+  --text-sub: #8E97A8;
+  --page-bg: #F5F6FA;
+  /* 状态栏那条颜色：各页在下面按 data-page 覆盖 */
+  --sb: #F5F6FA;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  background: var(--sb);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+h1, h2, p { margin: 0; font-weight: inherit; }
+a { color: inherit; text-decoration: none; }
+img { -webkit-user-drag: none; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.icon { flex: 0 0 auto; display: block; }
+.chev { flex: 0 0 auto; color: #C8C8C8; }
+
+/* ============ 状态栏取色条（仅 App 模式） ============ */
+/* iOS 26 用「页面顶部 fixed 元素的 background-color」决定状态栏颜色。
+   页面本身顶部是渐变，无法被采样，所以单独放一条纯色条给它采。
+   颜色与各页顶部一致，视觉上看不出来。 */
+.sb-tint { display: none; }
+
+@media (display-mode: standalone) {
+  /* 独立模式下这条色条会被看到，只需要压住页面最上沿一点点。
+     高度必须 ≥ 12px：iOS 26 只对「顶部 ≥12px 的 fixed 纯色元素」采样，
+     4px 时会被忽略，状态栏退回系统默认的白条 —— 这就是之前首页/我的页顶上发白的原因。 */
+  .sb-tint {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    z-index: 99999;
+    pointer-events: none;
+    background-color: #2F83F5;
+    /* 这条只负责「让 iOS 采到颜色」。采样发生在页面首帧，采完它就该消失：
+       24px 的高度正好压在首页搜索框 6~24px 那一段上，不淡出的话搜索框一直是缺口的。
+       由 main.js 在 load 之后加 body.sb-done 触发，元素本身保留（万一是按元素采样也找得到）。 */
+    transition: opacity .18s linear;
+  }
+
+  body.sb-done .sb-tint { opacity: 0; }
+
+  /* 首页顶上是渐变首色 #2C81F5，取色条与之取同一个值才没有色差 */
+  html[data-page="home"] .sb-tint { background-color: #2C81F5; }
+
+  /* 我的页首帧（整页加载 p=profile 时）就已经是贴图的蓝 */
+  html[data-page="profile"] .sb-tint { background-color: #2F83F5; }
+
+  /* 子页整页加载时，首帧就要是白顶栏，否则会被采样成首页的蓝 */
+  html[data-page="query"] .sb-tint,
+  html[data-page="result"] .sb-tint { background-color: #FFFFFF; }
+}
+
+/* ---- 首帧页面状态 ----
+   iOS 只在首次绘制时采样一次状态栏颜色，等 JS 跑完再切页就已经晚了。
+   head 里的同步脚本会把目标页写到 html[data-page]，这里让它第一帧就可见，
+   同时把首页的蓝色容器藏起来，避免参与采样。 */
+/* 状态栏那一条（webview 之上、59pt 高）是 iOS 用「页面背景色」画的，
+   之前统一是 body 的 #F5F6FA，于是首页/我的页顶上出现一条浅灰边。
+   这里逐页把 html / body 的背景色设成该页顶部真正的颜色，接缝就没了。
+   注意背景色会铺满整个画布，所以每个 .page 必须自己是不透明的。 */
+html[data-page="home"] { --sb: #2C81F5; }
+html[data-page="profile"] { --sb: #2F83F5; }
+html[data-page="query"],
+html[data-page="result"] { --sb: #FFFFFF; }
+
+html[data-page="home"],
+html[data-page="profile"],
+html[data-page="query"],
+html[data-page="result"] { background: var(--sb); }
+
+html[data-page="query"] body,
+html[data-page="result"] body { background: #FFFFFF; }
+
+html[data-page="query"] .page--home,
+html[data-page="result"] .page--home,
+html[data-page="profile"] .page--home { visibility: hidden; }
+
+html[data-page="query"] .page--query,
+html[data-page="result"] .page--result,
+html[data-page="profile"] .page--profile { visibility: visible; }
+
+/* ============ 页面容器 ============ */
+.page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  visibility: hidden;
+  background: transparent;
+}
+
+.page.is-active { visibility: visible; animation: fadeIn .18s ease both; }
+.page--sub.is-active { animation: slideIn .28s cubic-bezier(.32, .72, 0, 1) both; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.scroll {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar { display: none; }
+
+/* ============ 首页 ============ */
+.home-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 400px;
+  background:
+    linear-gradient(180deg,
+      #2C81F5 0px,
+      #3384F9 168px,
+      #3C8AF9 177px,
+      #5A9DF8 186px,
+      #8DB9FA 195px,
+      #BED6FA 204px,
+      #DDE9F9 213px,
+      #EFF4FA 222px,
+      #F5F6FA 231px,
+      #F5F6FA 400px);
+}
+
+.scroll--home {
+  padding-top: calc(var(--safe-top) + 6px);
+  padding-bottom: 96px;
+}
+
+/* ---- 搜索行 ---- */
+.searchrow {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  margin: 0 20px 0 12px;
+}
+
+.searchbar {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  min-width: 0;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .34);
+  color: #fff;
+}
+
+.searchbar__ph {
+  font-size: 15px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scan {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin-left: 20px;
+  color: #fff;
+}
+
+/* ---- 通知条 ---- */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 21px;
+  height: 42px;
+  margin: 20px 12px 0;
+  padding: 0 12px 0 8px;
+  border-radius: 8px;
+  background: #FEF5E6;
+  overflow: hidden;
+}
+
+.notice__icon {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+
+.notice__vp {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 22px), transparent 100%);
+}
+
+.notice__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: noticeScroll 16s linear infinite;
+}
+
+.notice__text {
+  font-size: 15px;
+  color: #9C640D;
+  white-space: nowrap;
+  padding-right: 48px;
+}
+
+@keyframes noticeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ---- 整块贴图卡片 ---- */
+/* 尺寸取自参考截图（885×1920 = 2.2519px/pt），保证与原 App 一一对应 */
+.hero {
+  display: block;
+  width: 368.6px;
+  height: 204.3px;
+  margin: 11.1px 0 0 12px;
+}
+
+.special {
+  display: block;
+  width: 368.6px;
+  height: 164.8px;
+  margin: 0 0 0 12px;
+}
+
+.section-title {
+  margin: 46px 0 17.4px 12px;
+  font-size: 17px;
+  line-height: 20.4px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ---- 服务网格 ---- */
+.services {
+  display: flex;
+  align-items: flex-start;
+  gap: 7.1px;
+  margin-top: 23.5px;
+  padding: 29px 0 0 12.9px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.services::-webkit-scrollbar { display: none; }
+
+.service {
+  position: relative;
+  flex: 0 0 105.7px;
+  width: 105.7px;
+  height: 138px;
+  padding: 10.5px 9px 0 10.2px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .05);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: visible;
+}
+
+/* 图标 = 设计稿原图直接裁下来，尺寸按各自裁切比例换算，保证「色块」高度一致 */
+.service__icon {
+  position: absolute;
+  display: block;
+  width: auto;
+}
+
+.service:nth-of-type(1) .service__icon { width: 39.6px; height: 37.2px; top: -34.5px; left: 7.9px; }
+.service:nth-of-type(2) .service__icon { width: 37.2px; height: 35.4px; top: -33.5px; left: 9.2px; }
+.service:nth-of-type(3) .service__icon { width: 36.5px; height: 35.9px; top: -33.9px; left: 9.0px; }
+.service:nth-of-type(4) .service__icon { width: 37.1px; height: 35.2px; top: -33.6px; left: 8.7px; }
+
+.service__title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 17.5px;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.service__desc {
+  margin-top: 4px;
+  font-size: 10.5px;
+  line-height: 14px;
+  color: #9AA4B2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.service__pill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 23.2px;
+  padding: 0 11px;
+  border-radius: 24px 0 18px 0;
+  font-size: 12.5px;
+  line-height: 23.2px;
+  white-space: nowrap;
+}
+
+.service__pill--blue { background: #A7D9FF; color: #4C97FE; }
+.service__pill--purple { background: #E4D4FD; color: #986CF0; }
+.service__pill--green { background: #9AF5EC; color: #44D5C0; }
+
+/* ---- 经营所得 banner ---- */
+.banner {
+  display: block;
+  width: calc(100% - 24px);
+  max-width: calc(100% - 24px);
+  height: auto;
+  margin: 26px 12px 0;
+  border-radius: 12px;
+}
+
+/* ============ 我的（贴图 + 原生状态栏 / 底部导航） ============ */
+/* html 背景已按页上色，页面自己必须不透明，否则会透出状态栏那条蓝 */
+.page--home,
+.page--profile { background: #F5F6FA; }
+
+.profile-page {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 顶部渐变：前 24px 是纯色 #2F83F5（跟状态栏同一个值、跟取色条同一段），
+   从 24px 之后才开始往贴图过渡 —— 取色条淡出后，这段纯色正好承接它，
+   不会在 24px 处留一道「纯色 → 贴图」的硬边（之前那里 alpha 已经掉到 0.72，所以看着像切了一刀）。
+   58px 收尾：头像上沿在 55px 左右，不能压到头像。 */
+.profile-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 58px;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(47, 131, 245, 1)     0px,
+    rgba(47, 131, 245, 1)    23px,
+    rgba(47, 131, 245, .90)  30px,
+    rgba(47, 131, 245, .76)  36px,
+    rgba(47, 131, 245, .56)  42px,
+    rgba(47, 131, 245, .34)  48px,
+    rgba(47, 131, 245, .14)  53px,
+    rgba(47, 131, 245, 0)    58px);
+}
+
+/* ============ 子页面（查询 / 结果） ============ */
+.page--sub { background: var(--page-bg); }
+
+.navbar {
+  position: relative;
+  z-index: 10;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: calc(46px + var(--safe-top));
+  padding: var(--safe-top) 16px 0;
+  background: #fff;
+  border-bottom: .5px solid #E8EBF0;
+}
+
+.navbar__back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  color: #5383EC;
+}
+
+.navbar__title {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 400;
+  color: #000;
+  white-space: nowrap;
+}
+
+.navbar__right { margin-left: auto; width: 44px; }
+
+.navbar__right--link {
+  width: auto;
+  margin-right: 13px;
+  font-size: 15.5px;
+  color: #5383EC;
+}
+
+.scroll--sub { padding-bottom: 40px; }
+
+/* ---- 整块白底分区 ---- */
+.sect { background: #fff; }
+.sect--group + .sect--group { margin-top: 13.2px; }
+.scroll--sub > .sect--group:first-child { margin-top: 12px; }
+
+.group-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 47px;
+  padding-left: 29px;
+  border-bottom: .5px solid #EDEFF3;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.group-title::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  margin-top: -8px;
+  width: 4px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--btn-blue);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 16px;
+}
+
+.row__label {
+  width: 123px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.row__value {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.row .chev { margin-left: auto; }
+
+.check-row {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px 0 17px;
+}
+
+.check-circle {
+  display: grid;
+  place-items: center;
+  width: 22.6px;
+  height: 22.6px;
+  border-radius: 50%;
+  border: 1px solid #CBD3DE;
+  color: transparent;
+  flex: 0 0 auto;
+  margin-right: 20.7px;
+}
+
+.check-row.is-on .check-circle {
+  background: var(--btn-blue);
+  border-color: var(--btn-blue);
+  color: #fff;
+}
+
+.check-row__text {
+  font-size: 16px;
+  color: var(--text);
+}
+
+.check-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 52px;
+  font-size: 15px;
+  color: var(--btn-blue);
+}
+
+.primary-btn {
+  display: block;
+  width: calc(100% - 40px);
+  height: 48px;
+  margin: 34px 20px 0;
+  border-radius: 5px;
+  background: var(--btn-blue);
+  color: #fff;
+  font-size: 16.5px;
+}
+
+/* ---- 结果页 ---- */
+.summary {
+  margin-top: 12px;
+  padding: 0 18px 0 17px;
+  background: #fff;
+}
+
+.summary__row {
+  display: flex;
+  align-items: center;
+  height: 42px;
+}
+
+.summary__label {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2E2E2E;
+}
+
+.qmark {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin: 0 .6px 0 6.4px;
+  background: url(../img/icon-qmark.png) center / 100% 100% no-repeat;
+  vertical-align: -3.5px;
+}
+
+.summary__value {
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2E2E2E;
+}
+
+.summary__line {
+  height: .5px;
+  background: #EFF1F5;
+}
+
+.records {
+  margin-top: 12.3px;
+  display: flex;
+  flex-direction: column;
+  gap: 12.3px;
+}
+
+.record {
+  position: relative;
+  padding: 17.4px 52px 13.4px 17px;
+  background: #fff;
+}
+
+.record__head {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 3.6px;
+}
+
+.record__type {
+  font-size: 17px;
+  color: #2E2E2E;
+}
+
+.record__month {
+  margin-left: auto;
+  font-size: 17px;
+  color: #2E2E2E;
+}
+
+.record__line {
+  font-size: 15px;
+  line-height: 26.7px;
+  color: #94969B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.record__line:first-of-type { margin-top: 4.5px; }
+
+.record .chev {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ============ 底部导航（悬浮胶囊 · 半透明毛玻璃） ============ */
+.tabbar {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: 21.7px;
+  z-index: 50;
+  display: none;
+  align-items: center;
+  height: 64px;
+  padding: 0 28px;
+  border-radius: 31px;
+  background: rgba(255, 255, 255, .72);
+  border: .5px solid rgba(255, 255, 255, .62);
+  box-shadow: 0 6px 22px rgba(21, 40, 80, .14), 0 1px 3px rgba(21, 40, 80, .07);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+
+body[data-page="home"] .tabbar,
+body[data-page="profile"] .tabbar { display: flex; }
+
+/* 首帧就按 html[data-page] 判断（此时 body 的 data-page 还是默认的 home），
+   否则子页加载的第一帧会闪一下底部导航 */
+html[data-page="query"] .tabbar,
+html[data-page="result"] .tabbar { display: none; }
+
+.tab-item {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 100%;
+  font-size: 10.3px;
+  line-height: 1.05;
+  color: #2E3037;
+}
+
+.tab-item.is-active { color: var(--blue); }
+
+.tab-icon {
+  display: block;
+  width: 19px;
+  height: 19px;
+  object-fit: contain;
+}
+
+.tab-icon--on { display: none; }
+
+.tab-item.is-active .tab-icon--on { display: block; }
+.tab-item.is-active .tab-icon--off { display: none; }
+
+/* 消息未读角标 */
+.tab-badge {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  margin-left: 4px;
+  min-width: 20px;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 7px;
+  background: #FC4343;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+  text-align: center;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .96);
+}
+
+/* ============ 桌面预览（仅便于在电脑上看效果） ============ */
+@media (min-width: 520px) {
+  .page {
+    left: 50%;
+    right: auto;
+    width: 393px;
+    margin-left: -196.5px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, .12);
+  }
+
+  .tabbar {
+    left: 50%;
+    right: auto;
+    width: 373px;
+    margin-left: -186.5px;
+  }
+}
+
+
+/* ============ 加载状态（黑色半透明方块 + 菊花） ============ */
+.loading {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  place-items: center;
+}
+
+.page.is-loading .loading { display: grid; }
+
+.page.is-loading .scroll,
+.page.is-loading .navbar {
+  opacity: .32;
+  pointer-events: none;
+}
+
+.loading__box {
+  display: grid;
+  place-items: center;
+  width: 132px;
+  height: 108px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, .5);
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg,
+    #fff 0deg 11deg,
+    rgba(255, 255, 255, 0) 11deg 30deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 9px, #000 9.5px 16.5px, transparent 17px);
+  mask: radial-gradient(circle, transparent 0 9px, #000 9.5px 16.5px, transparent 17px);
+  animation: spinnerSpin 1s steps(12) infinite;
+}
+
+@keyframes spinnerSpin {
+  to { transform: rotate(360deg); }
+}

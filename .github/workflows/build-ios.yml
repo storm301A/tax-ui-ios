@@ -1,0 +1,62 @@
+name: build-unsigned-ipa
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          pod --version
+
+      - name: Install npm deps
+        run: npm ci
+
+      - name: Copy web assets and install pods
+        run: npx cap sync ios
+
+      - name: Archive (unsigned)
+        run: |
+          cd ios/App
+          xcodebuild \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            EXPANDED_CODE_SIGN_IDENTITY="" \
+            archive
+
+      - name: Package ipa
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/Payload/"
+          cd "$RUNNER_TEMP"
+          /usr/bin/zip -qry taxui-unsigned.ipa Payload
+          ls -lh taxui-unsigned.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: taxui-unsigned-ipa
+          path: ${{ runner.temp }}/taxui-unsigned.ipa
+          if-no-files-found: error
