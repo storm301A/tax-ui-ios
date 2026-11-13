@@ -108,17 +108,23 @@ function back(target) {
 const PAYER_JIEYOU  = '广州市杰优信息科技...';
 const PAYER_QICHENG = '广州市启橙网络技术...';
 
-const YEARS = ['2023', '2024', '2025', '2026'];
+const YEARS = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
 const EMPTY_YEAR = { summary: { income: '0.00', tax: '0.00' }, records: [] };
 
 const DATA = {
+  // 2018–2024 暂无数据，选中后结果页走空态
+  '2018': EMPTY_YEAR,
+  '2019': EMPTY_YEAR,
+  '2020': EMPTY_YEAR,
+  '2021': EMPTY_YEAR,
+  '2022': EMPTY_YEAR,
   '2023': EMPTY_YEAR,
   '2024': EMPTY_YEAR,
 
   // 2025 年：按用户提供的月度表，月份倒序（表中没有 9、10 月）。
   // 11/12 月扣缴义务人＝杰优，1–8 月＝启橙；所得项目小类均为正常工资薪金。
   '2025': {
-    summary: { income: '129070', tax: '5278.52' },
+    summary: { income: '129070.00', tax: '5278.52' },
     records: [
       { month: 12, income: '9242.71',  tax: '110.8',  payer: PAYER_JIEYOU },
       { month: 11, income: '9419.82',  tax: '132.59', payer: PAYER_JIEYOU },

@@ -497,7 +497,7 @@ html[data-page="profile"] .page--profile { visibility: visible; }
    面板顶 1145px→508pt（面板高 344pt）、工具栏分隔线 1242px→551pt（栏高 44pt）、
    选中槽 1537..1626px→682..722pt（中心 702pt / 高 40pt）、行距 90px→40pt、
    遮罩把白底压成 (127,127,127) = rgba(0,0,0,.5)、确定按钮 #4980FE、取消 #4B4A4F。
-   按钮 16pt、年份 17pt；非选中项按与选中行的距离做 3D 渐隐
+   按钮 16pt、年份 16pt（对照原图略收一点点）；非选中项按与选中行的距离做 3D 渐隐
    （距 1/2/3 行对应 #A4/#BF/#DC）。 */
 .year-picker {
   position: fixed;
@@ -582,7 +582,7 @@ html[data-page="profile"] .page--profile { visibility: visible; }
   height: 40px;
   line-height: 40px;
   text-align: center;
-  font-size: 17px;
+  font-size: 16px;
   color: #000;
   font-variant-numeric: tabular-nums;
   cursor: pointer;

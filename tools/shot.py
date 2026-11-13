@@ -39,16 +39,18 @@ inject = """
     if (q.get('selftest')) {
       const log = [];
       const yv = () => document.getElementById('year-value').textContent;
+      const target = q.get('pick') || '2025';
+      log.push('years=' + YEARS.join(','));
       log.push('init=' + yv());
       openYearPicker();
       log.push('open=' + document.getElementById('year-picker').classList.contains('is-open'));
-      document.querySelector('[data-year-index="2"]').click();
+      document.querySelector('[data-year-index="' + YEARS.indexOf(target) + '"]').click();
       document.querySelector('[data-year-confirm]').click();
       log.push('picked=' + yv());
       log.push('income=' + document.getElementById('sum-income').textContent);
       log.push('tax=' + document.getElementById('sum-tax').textContent);
       log.push('rows=' + document.querySelectorAll('#records .record').length);
-      log.push('firstPayer=' + document.querySelector('#records .record__line:nth-of-type(2)').textContent);
+      log.push('empty=' + !!document.querySelector('#records .records__empty'));
       log.push('closed=' + !document.getElementById('year-picker').classList.contains('is-open'));
       const pre = document.createElement('pre');
       pre.id = 'selftest-result';
