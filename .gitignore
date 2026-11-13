@@ -13,3 +13,5 @@ ios/App/App.xcworkspace/xcshareddata/swiftpm/
 .workbuddy/
 *.genie
 ios-showcase/
+.tools/
+*.zip
