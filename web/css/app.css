@@ -490,6 +490,111 @@ html[data-page="profile"] .page--profile { visibility: visible; }
 }
 
 .row .chev { margin-left: auto; }
+.row--year { cursor: pointer; }
+
+/* ============ 纳税年度滚轮选择器（逐像素对齐 iOS 原生弹层） ============
+   参考实机截图 885x1920（=393x852pt @2.25）逐行量得：
+   面板顶 1145px→508pt（面板高 344pt）、工具栏分隔线 1242px→551pt（栏高 44pt）、
+   选中槽 1537..1626px→682..722pt（中心 702pt / 高 40pt）、行距 90px→40pt、
+   遮罩把白底压成 (127,127,127) = rgba(0,0,0,.5)、确定按钮 #4980FE、取消 #4B4A4F。
+   按钮 16pt、年份 17pt；非选中项按与选中行的距离做 3D 渐隐
+   （距 1/2/3 行对应 #A4/#BF/#DC）。 */
+.year-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear .3s;   /* 关闭时等面板滑完再隐藏 */
+}
+.year-picker.is-open {
+  visibility: visible;
+  pointer-events: auto;
+  transition: visibility 0s;
+}
+.year-picker__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+  opacity: 0;
+  transition: opacity .25s linear;
+}
+.year-picker.is-open .year-picker__mask { opacity: 1; }
+
+.year-picker__sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 344px;                 /* 44 工具栏 + 300 滚轮区 */
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform .28s cubic-bezier(.32, .72, 0, 1);
+}
+.year-picker.is-open .year-picker__sheet { transform: translateY(0); }
+
+.year-picker__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 16px;
+  border-bottom: 1px solid #DCDCDD;
+}
+.year-picker__btn {
+  font-size: 16px;
+  line-height: 44px;
+  letter-spacing: .2px;
+}
+.year-picker__btn--cancel { color: #4B4A4F; }
+.year-picker__btn--done   { color: #4980FE; }
+
+.year-picker__wheel {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  touch-action: none;
+}
+.year-picker__slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 40px;
+  margin-top: -20px;
+  border-top: 1px solid #D8D8D8;
+  border-bottom: 1px solid #D6D6D6;
+  pointer-events: none;
+}
+.year-picker__list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  will-change: transform;
+}
+.year-picker__item {
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  font-size: 17px;
+  color: #000;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+/* 无数据年度的结果页空态 */
+.records__empty {
+  padding: 64px 0 80px;
+  text-align: center;
+  font-size: 14px;
+  color: #9AA0A8;
+}
 
 .check-row {
   display: flex;
@@ -722,6 +827,14 @@ html[data-page="result"] .tabbar { display: none; }
     right: auto;
     width: 373px;
     margin-left: -186.5px;
+  }
+
+  /* 年度弹层也要收进 393 的机身里，桌面预览才不会铺满整个浏览器窗口 */
+  .year-picker {
+    left: 50%;
+    right: auto;
+    width: 393px;
+    margin-left: -196.5px;
   }
 }
 

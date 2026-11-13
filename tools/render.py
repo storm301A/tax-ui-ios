@@ -51,7 +51,8 @@ def main():
 
     extra = sys.argv[3] if len(sys.argv) > 3 else ''
     url = f'http://127.0.0.1:{PORT}/_shot.html?p={page}' + extra
-    profile = ROOT / '.tmp' / 'edgeprofile'
+    # 每次用全新目录，避免旧 profile 里缓存的 JS/CSS 影响校验（不删任何既有文件）
+    profile = ROOT / '.tmp' / ('edgeprofile-%d' % time.time_ns())
     subprocess.run([
         EDGE, '--headless=new', '--disable-gpu', '--hide-scrollbars',
         f'--user-data-dir={profile}', '--force-device-scale-factor=3',
